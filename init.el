@@ -29,6 +29,7 @@
 	  magit
 	  paredit
 	  undo-tree
+	  ag
 	  zenburn-theme)))
 
 (condition-case nil 
