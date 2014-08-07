@@ -34,6 +34,8 @@
 	  undo-tree
 	  flycheck
 	  ag
+	  auto-complete
+	  helm
 	  zenburn-theme)))
 
 (condition-case nil 
