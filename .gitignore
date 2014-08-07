@@ -32,3 +32,8 @@ tramp
 # AUCTeX auto folder
 /auto/
 
+# emacs-setup.el gets created from the init
+emacs-setup.el
+
+#ac-comphist.dat seems to come from autocomplete
+ac-comphist.dat

@@ -6,8 +6,6 @@
 #+KEYWORDS: emacs org configure
 #+LANGUAGE: EN
 
-
-
 * Motivation
 
   It's difficult to keep up with emacs changes especially since I'm not
