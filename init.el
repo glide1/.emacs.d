@@ -1,5 +1,8 @@
 ;;;; init.el --- my init.el file
+;;; Commentary:
+;;; This is the initialization file for Emacs
 
+;;; Code:
 ;; turn off mouse interface early in startup to avoid momentary display
 (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
@@ -21,7 +24,7 @@
 (package-initialize)
 
 (defun install-my-packages ()
-  "install my packages"
+  "Install my packages."
   (mapc `(lambda (package)
 	   (unless (package-installed-p package)
 	     (package-install package)))
@@ -52,9 +55,15 @@
 
 (load-theme 'zenburn t)
 
-;;;; emacs lisp
+;;;; Emacs Lisp
 (defun imenu-elisp-sections ()
+  "Add sections that have 4 semicolons."
   (setq imenu-prev-index-position-function nil)
   (add-to-list 'imenu-generic-expression '("Sections" "^;;;; \\(.+\\)$" 1) t))
 
 (add-hook 'emacs-lisp-mode-hook 'imenu-elisp-sections)
+
+(add-hook 'after-init-hook #'global-flycheck-mode)
+
+(provide 'init)
+;;; init.el ends here
