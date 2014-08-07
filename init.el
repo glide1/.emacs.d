@@ -29,6 +29,7 @@
 	  magit
 	  paredit
 	  undo-tree
+	  flycheck
 	  ag
 	  zenburn-theme)))
 
