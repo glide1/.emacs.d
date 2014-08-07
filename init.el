@@ -1,6 +1,9 @@
 ;;;; init.el --- my init.el file
 ;;; Commentary:
 ;;; This is the initialization file for Emacs
+;;; This file is based off of the org-mode literate programming
+;;; guide.  This bootstraps org mode and reads the rest from literate
+;;; Org-mode files.
 
 ;;; Code:
 ;; turn off mouse interface early in startup to avoid momentary display
@@ -10,74 +13,24 @@
 
 (setq inhibit-startup-screen t)
 
-(setq site-lisp-dir
-      (expand-file-name "site-lisp" user-emacs-directory))
+(setq dotfiles-dir (file-name-directory (or (buffer-file-name) load-file-name)))
 
-(add-to-list 'load-path user-emacs-directory)
-(add-to-list 'load-path site-lisp-dir)
+(let* ((org-dir (expand-file-name
+		 "lisp" (expand-file-name
+			 "org" (expand-file-name
+				"src" dotfiles-dir))))
+       (org-contrib-dir (expand-file-name
+			 "lisp" (expand-file-name
+				 "contrib" (expand-file-name
+					    ".." org-dir))))
+       (load-path (append (list org-dir org-contrib-dir)
+			  (or load-path nil))))
+  ;load up Org-mode and Org-babel
+  (require 'org-install)
+  (require 'ob-tangle))
 
-;;;; package.el
-(require 'package)
-(setq package-user-dir "~/.emacs.d/elpha/")
-(add-to-list 'package-archives
-	     '("melpa" . "http://melpa.milkbox.net/packages/") t)
-(package-initialize)
+;; load all literate org-mode files in this directory
+;;(org-babel-load-file "emacs-setup.org")
+(mapc #'org-babel-load-file (directory-files dotfiles-dir t "^emacs-setup.org$"))
 
-(defun install-my-packages ()
-  "Install my packages."
-  (mapc `(lambda (package)
-	   (unless (package-installed-p package)
-	     (package-install package)))
-	'(evil
-	  magit
-	  paredit
-	  undo-tree
-	  flycheck
-	  ag
-	  auto-complete
-	  helm
-	  discover-my-major
-	  zenburn-theme)))
-
-(condition-case nil 
-    (install-my-packages)
-  (error
-   (package-refresh-contents)
-   (install-my-packages)))
-
-;;;; macros
-(defmacro after (mode &rest body)
-  "`eval-after-load' MODE evaluate BODY."
-  (declare (indent defun))
-  `(eval-after-load ,mode
-     '(progn ,@body)))
-
-;;;; global key bindings
-
-(require 'setup-evil)
-
-(load-theme 'zenburn t)
-
-(helm-mode)
-
-(require 'setup-auto-complete)
- 
-;;;; Some editing customizations
-(define-key global-map (kbd "RET") 'newline-and-indent)
-
-;; for discover my major
-(global-set-key (kbd "C-h C-m") 'discover-my-major)
-
-
-;;;; Emacs Lisp
-(defun imenu-elisp-sections ()
-  "Add sections that have 4 semicolons."
-  (setq imenu-prev-index-position-function nil)
-  (add-to-list 'imenu-generic-expression '("Sections" "^;;;; \\(.+\\)$" 1) t))
-
-(add-hook 'emacs-lisp-mode-hook 'imenu-elisp-sections)
-
-(add-hook 'after-init-hook #'global-flycheck-mode)
-
-(provide 'init)
 ;;; init.el ends here
