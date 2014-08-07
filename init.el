@@ -36,6 +36,7 @@
 	  ag
 	  auto-complete
 	  helm
+	  discover-my-major
 	  zenburn-theme)))
 
 (condition-case nil 
@@ -57,7 +58,16 @@
 
 (load-theme 'zenburn t)
 
-(helm-mode 1)
+(helm-mode)
+
+(require 'setup-auto-complete)
+ 
+;;;; Some editing customizations
+(define-key global-map (kbd "RET") 'newline-and-indent)
+
+;; for discover my major
+(global-set-key (kbd "C-h C-m") 'discover-my-major)
+
 
 ;;;; Emacs Lisp
 (defun imenu-elisp-sections ()
