@@ -57,6 +57,8 @@
 
 (load-theme 'zenburn t)
 
+(helm-mode 1)
+
 ;;;; Emacs Lisp
 (defun imenu-elisp-sections ()
   "Add sections that have 4 semicolons."
