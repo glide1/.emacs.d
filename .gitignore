@@ -37,3 +37,4 @@ emacs-setup.el
 
 #ac-comphist.dat seems to come from autocomplete
 ac-comphist.dat
+el-get

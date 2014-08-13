@@ -10,7 +10,7 @@
 
   It's difficult to keep up with emacs changes especially since I'm not
   modifying Emacs full time or something.
-
+  
 * Prerequisites
   
   Currently this has only been tested on OS X. 
@@ -22,7 +22,7 @@
 
 ** Package Manager Setup
 
-   Let's get melpa in here
+   Let's get melpa in here, and el-get.
    #+begin_src emacs-lisp
      (require 'package)
      
@@ -30,6 +30,18 @@
      (add-to-list 'package-archives
                   '("melpa" . "http://melpa.milkbox.net/packages/") t)
      (package-initialize)
+     
+     (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+     
+     (unless (require 'el-get nil 'noerror)
+       (with-current-buffer
+           (url-retrieve-synchronously
+            "https://raw.github.com/dimitri/el-get/master/el-get-install.el")
+         (goto-char (point-max))
+         (eval-print-last-sexp)))
+     
+     (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
+     (el-get 'sync)
    #+end_src
    
 ** List of Packages
@@ -44,6 +56,7 @@
                   (package-install package)))
              '(evil
                evil-leader
+               evil-tabs
                elscreen
                magit
                paredit
@@ -53,6 +66,7 @@
                auto-complete
                helm
                discover-my-major
+               web-mode
                zenburn-theme)))
    #+end_src
 
@@ -64,10 +78,32 @@
         (package-refresh-contents)
         (install-my-packages)))
    #+end_src
+
+   Here are some packages from el-get:
+
+   #+begin_src emacs-lisp
+     (el-get-install 'js3-mode)
+     (el-get-install 'tern)
+   #+end_src
+
+** Post Package installation
+
+   Be sure to go into the tern directory in .emacs.d/el-get/tern and run
+   npm install to set it up properly. Emacs will call the tern in this
+   directory and if it's not installed it will not run properly.
    
 * Package Customization
 
   What's the fun if the packages aren't customized in some way?
+
+** base emacs
+
+   #+begin_src emacs-lisp
+     (electric-indent-mode 1)
+     
+     (column-number-mode)
+   #+end_src
+
 
 ** evil
 
@@ -108,13 +144,36 @@
      
    #+end_src
 
+   The last bit is for default states. Sometimes evil gets in the way of using of some of the tools so set
+   the default state to emacs.
+
+
+   #+begin_src emacs-lisp
+     (loop for (mode . state) in '(
+                                   (dired-mode . emacs)
+                                   )
+           do (evil-set-initial-state mode state))
+   #+end_src
+
 ** evil-leader
 
    #+begin_src emacs-lisp
      (require 'evil-leader)
      
      (global-evil-leader-mode)
-     (evil-leader/set-leader "\")
+     (evil-leader/set-leader "\\")
+   #+end_src
+** evil-tabs
+
+   Add some custom keys in evil to create and kill tabs
+
+   #+begin_src emacs-lisp
+     (require 'evil-tabs)
+     (global-evil-tabs-mode t)
+     
+     (evil-define-key 'normal evil-tabs-mode-map
+       "gc" 'elscreen-create
+       "gk" 'elscreen-kill)
    #+end_src
 
 ** helm
@@ -138,17 +197,78 @@
 ** elscreen
 
    #+begin_src emacs-lisp
+     (elscreen-set-prefix-key "\C-w")
      (elscreen-start)
    #+end_src
 
+** discover-my-major
+
+   Really a keybind just needs to be set for this.
+   
+   #+begin_src emacs-lisp
+     
+     (global-set-key (kbd "C-h C-m") 'discover-my-major)
+     
+   #+end_src
+
+** web-mode
+
+   Be sure to add tern to web-mode
+
+   #+begin_src emacs-lisp
+     (require 'web-mode)
+     
+     
+   #+end_src
+   
+** Tern
+
+   Make sure to tie in tern with js3-mode.
+   Tie in tern and auto-complete.
+   
+   #+begin_src emacs-lisp
+     
+     (eval-after-load 'tern
+       '(progn
+          (require 'tern-auto-complete)
+          (tern-ac-setup)))
+     
+     
+   #+end_src
+   
+
+** js3-mode
+
+
+   #+begin_src emacs-lisp
+     (setq js3-mirror-mode t)
+     
+     (add-hook 'js3-mode-hook (lambda ()
+                                (tern-mode t)
+                                (when (require 'auto-complete nil t)
+                                  (make-variable-buffer-local 'ac-sources)
+                                  (add-to-list 'ac-sources 'ac-source-yasnippet)
+                                  (auto-complete-mode t))))
+     
+   #+end_src
 ** other
    
    #+begin_src emacs-lisp
      (load-theme 'zenburn t)
-     
-     ;; for discover my major
-     (global-set-key (kbd "C-h C-m") 'discover-my-major)
    #+end_src
    
-   
-   
+** path customization
+
+   #+begin_src emacs-lisp
+     (defun set-exec-var-from-shell (var)
+       "Sets the exec-path to the same value used by the user shell"
+       (let ((path-from-shell
+              (replace-regexp-in-string
+               "[[:space:]\n]*$" ""
+               (shell-command-to-string (format "$SHELL -l -c 'echo $%s'" var)))))
+         (setenv var
+                 path-from-shell)
+         (setq exec-path (split-string path-from-shell path-separator))))
+     
+     (set-exec-var-from-shell "PATH")
+   #+end_src
